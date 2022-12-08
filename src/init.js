@@ -10,7 +10,7 @@ const SCOPE = 'ent_cloudmgr_sdk'
 async function initSdk() {
     const baseUrl = core.getInput('baseUrl', REQUIRED)
 
-    let apiKey = core.getInput('clientId', REQUIRED)
+    let apiKey = core.getInput('clientId')
     let imsOrgId = core.getInput('imsOrgId')
     let imsConfig = core.getInput('imsConfig')
     let imsConfigJson
