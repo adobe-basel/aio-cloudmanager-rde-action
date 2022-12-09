@@ -10,12 +10,15 @@ const SCOPE = 'ent_cloudmgr_sdk'
 async function initSdk() {
     const baseUrl = core.getInput('baseUrl', REQUIRED)
 
-    let apiKey = core.getInput('clientId')
-    let imsOrgId = core.getInput('imsOrgId')
     let imsConfig = core.getInput('imsConfig')
+    let apiKey
+    let imsOrgId
     let imsConfigJson
 
     if (imsConfig === '') {
+        apiKey = core.getInput('clientId')
+        imsOrgId = core.getInput('imsOrgId')
+
         const key = core.getInput('key', REQUIRED)
         const clientSecret = core.getInput('clientSecret', REQUIRED)
         const techAccId = core.getInput('technicalAccountId', REQUIRED)
@@ -37,7 +40,7 @@ async function initSdk() {
         imsOrgId = imsConfigJson.ims_org_id
     }
 
-    core.info(`IMS config: ${imsConfigJson}`)
+    core.info(`IMS config: ${JSON.stringify(imsConfigJson)}`)
 
     await context.set(CONTEXT, imsConfigJson, true)
     const accessToken = await getToken(CONTEXT)

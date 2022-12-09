@@ -1,7 +1,7 @@
 const core = require('@actions/core')
 const {getCurrentStep} = require('@adobe/aio-lib-cloudmanager')
 const {initSdk} = require('./init')
-const {REQUIRED} = require('./constants')
+const {REQUIRED, FINISHED} = require('./constants')
 
 function executeAction() {
     return new Promise((resolve) => {
@@ -66,7 +66,7 @@ async function checkExecutionStatus(sdk, programId, pipelineId, executionId) {
 
     let status = null;
 
-    while (status !== 'FINISHED') {
+    while (status !== FINISHED) {
         core.info('Checking Pipeline Execution status...')
 
         await sdk.getExecution(programId, pipelineId, executionId)
@@ -75,7 +75,7 @@ async function checkExecutionStatus(sdk, programId, pipelineId, executionId) {
 
                 core.info(`Pipeline Execution Status: ${status}`)
 
-                if (status !== 'FINISHED') {
+                if (status !== FINISHED) {
                     const step = getCurrentStep(execution)
 
                     if (step) {
@@ -84,7 +84,7 @@ async function checkExecutionStatus(sdk, programId, pipelineId, executionId) {
                 }
             })
 
-        if (status !== 'FINISHED') {
+        if (status !== FINISHED) {
             await delay()
         }
     }
