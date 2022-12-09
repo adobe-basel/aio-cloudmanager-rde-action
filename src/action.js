@@ -62,7 +62,7 @@ async function addSummary(sdk, programId, pipelineId, executionId) {
 }
 
 async function checkExecutionStatus(sdk, programId, pipelineId, executionId) {
-    const delay = async (ms = 10000) => new Promise(resolve => setTimeout(resolve, ms))
+    const delay = async (ms = 30000) => new Promise(resolve => setTimeout(resolve, ms))
 
     let status = null;
 
