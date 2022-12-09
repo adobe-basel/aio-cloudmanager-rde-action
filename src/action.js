@@ -15,10 +15,12 @@ function executeAction() {
                 .then(execution => {
                     core.info(`Started Pipeline Execution with ID: ${execution.id}`)
 
-                    checkExecutionStatus(sdk, programId, pipelineId, execution.id).then(() => {
-                        addSummary(sdk, programId, pipelineId, execution.id).then(() => {
-                            core.info('Execution completed, see Summary for results.')
-                        })
+                    checkExecutionStatus(sdk, programId, pipelineId, execution.id).then(status => {
+                        if (status === FINISHED) {
+                            addSummary(sdk, programId, pipelineId, execution.id).then(() => {
+                                core.info('Execution completed, see Summary for results.')
+                            })
+                        }
                     })
 
                     resolve()
@@ -92,6 +94,8 @@ async function checkExecutionStatus(sdk, programId, pipelineId, executionId) {
     } else {
         core.setFailed('Pipeline Execution failed.')
     }
+
+    return status
 }
 
 module.exports = {

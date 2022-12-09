@@ -1,6 +1,6 @@
 {
   "name": "aio-cloudmanager-pipeline-action",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "",
   "scripts": {
     "lint": "eslint src/**.js",
