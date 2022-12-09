@@ -37,27 +37,27 @@ function executeAction() {
 
 async function addSummary(sdk, programId, pipelineId, executionId) {
     sdk.getQualityGateResults(programId, pipelineId, executionId, 'codeQuality').then(result => {
-        let tableData = [[
-            {data: 'KPI', header: true},
-            {data: 'Severity', header: true},
-            {data: 'Passed', header: true},
-            {data: 'Expected Value', header: true},
-            {data: 'Actual Value', header: true}
-        ]]
+        if (result.metrics) {
+            let tableData = [[
+                {data: 'KPI', header: true},
+                {data: 'Severity', header: true},
+                {data: 'Passed', header: true},
+                {data: 'Expected Value', header: true},
+                {data: 'Actual Value', header: true}
+            ]]
 
-        const tableRows = result.metrics.map(metric => [
-            metric.kpi,
-            metric.severity,
-            metric.passed ? 'yes' : 'no',
-            metric.expectedValue,
-            metric.actualValue
-        ])
+            const tableRows = result.metrics.map(metric => [
+                metric.kpi,
+                metric.severity,
+                metric.passed ? 'yes' : 'no',
+                metric.expectedValue,
+                metric.actualValue
+            ])
 
-        tableData.push(...tableRows)
+            tableData.push(...tableRows)
 
-        core.summary.addHeading('Cloud Manager Code Scanning Results')
-            .addTable(tableData)
-            .write()
+            core.summary.addTable(tableData).write()
+        }
     })
 }
 
