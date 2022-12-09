@@ -1,6 +1,6 @@
 {
   "name": "aio-cloudmanager-pipeline-action",
-  "version": "0.0.6",
+  "version": "0.0.9",
   "description": "",
   "scripts": {
     "lint": "eslint src/**.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lykorian/aio-cloudmanager-pipeline-action.git"
+    "url": "git+https://github.com/adobe-basel/aio-cloudmanager-pipeline-action.git"
   },
   "keywords": [
     "GitHub",
@@ -21,9 +21,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lykorian/aio-cloudmanager-pipeline-action/issues"
+    "url": "https://github.com/adobe-basel/aio-cloudmanager-pipeline-action/issues"
   },
-  "homepage": "https://github.com/lykorian/aio-cloudmanager-pipeline-action#readme",
+  "homepage": "https://github.com/adobe-basel/aio-cloudmanager-pipeline-action#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@adobe/aio-lib-cloudmanager": "2.0.0",

@@ -9,7 +9,7 @@ function executeAction() {
         const pipelineId = core.getInput('pipelineId', REQUIRED)
 
         initSdk().then(sdk => {
-            core.info(`Creating execution for programId=${programId} and pipelineId=${pipelineId}`)
+            core.info('SDK initialized, creating pipeline execution...')
 
             sdk.createExecution(programId, pipelineId)
                 .then(execution => {
@@ -48,14 +48,14 @@ async function addSummary(sdk, programId, pipelineId, executionId) {
         const tableRows = result.metrics.map(metric => [
             metric.kpi,
             metric.severity,
-            metric.passed,
+            metric.passed ? 'yes' : 'no',
             metric.expectedValue,
             metric.actualValue
         ])
 
         tableData.push(...tableRows)
 
-        core.summary.addHeading('Code Scanning Results')
+        core.summary.addHeading('Cloud Manager Code Scanning Results')
             .addTable(tableData)
             .write()
     })

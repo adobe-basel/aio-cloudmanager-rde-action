@@ -40,8 +40,6 @@ async function initSdk() {
         imsOrgId = imsConfigJson.ims_org_id
     }
 
-    core.info(`IMS config: ${JSON.stringify(imsConfigJson)}`)
-
     await context.set(CONTEXT, imsConfigJson, true)
     const accessToken = await getToken(CONTEXT)
 
