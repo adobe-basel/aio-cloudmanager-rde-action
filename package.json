@@ -1,17 +1,17 @@
 {
-  "name": "aio-cloudmanager-pipeline-action",
+  "name": "aio-cloudmanager-rde-action",
   "version": "0.0.13",
   "description": "",
   "scripts": {
     "lint": "eslint src/**.js",
     "package": "ncc build src/index.js -o dist/",
-    "prepare": "ncc build index.js -o dist --source-map --license licenses.txt",
+    "prepare": "ncc build src/index.js -o dist --source-map --license licenses.txt",
     "test": "jest",
     "all": "npm run lint && npm run prepare && npm run test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adobe-basel/aio-cloudmanager-pipeline-action.git"
+    "url": "git+https://github.com/adobe-basel/aio-cloudmanager-rde-action.git"
   },
   "keywords": [
     "GitHub",
@@ -21,11 +21,12 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adobe-basel/aio-cloudmanager-pipeline-action/issues"
+    "url": "https://github.com/adobe-basel/aio-cloudmanager-rde-action/issues"
   },
-  "homepage": "https://github.com/adobe-basel/aio-cloudmanager-pipeline-action#readme",
+  "homepage": "https://github.com/adobe-basel/aio-cloudmanager-rde-action#readme",
   "dependencies": {
     "@actions/core": "^1.10.0",
+    "@adobe/aio-cli-plugin-aem-rde": "^0.0.1-alpha.11",
     "@adobe/aio-lib-cloudmanager": "2.0.0",
     "@adobe/aio-lib-ims": "6.0.1",
     "halfred": "2.0.0",
