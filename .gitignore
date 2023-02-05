@@ -67,11 +67,7 @@ typings/
 .next
 /.aio
 /.envrc
-/dist/
-/dist/*
-
-dist/
-dist/*
 
 package-lock.json
-/dist/
+
+/dist/.aio
