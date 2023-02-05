@@ -4,8 +4,11 @@ inputs:
   programId:
     description: 'The Program ID'
     required: true
-  pipelineId:
-    description: 'The Pipeline ID'
+  environmentName:
+    description: 'The Environment name'
+    required: true
+  action:
+    description: 'create or delete'
     required: true
   imsOrgId:
     description: 'The IMS Organization ID'

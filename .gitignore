@@ -65,3 +65,13 @@ typings/
 
 # next.js build output
 .next
+/.aio
+/.envrc
+/dist/
+/dist/*
+
+dist/
+dist/*
+
+package-lock.json
+/dist/
