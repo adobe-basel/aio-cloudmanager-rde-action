@@ -76,12 +76,12 @@ async function createRDEEnvironment(programId, environmentName) {
 
     await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
 
-    core.info('environmentId', environment.id)
-    core.info('environmentName', environment.name)
-    core.info('environmentType', environment.type)
-    core.info('environmentDescription', environment.description);
+    core.info('environmentId: ' + environment.id)
+    core.info('environmentName: ' + environment.name)
+    core.info('environmentType: ' + environment.type)
+    core.info('environmentDescription: ' + environment.description);
 
-    core.summary.write(`Environment ${environmentName} created`).write()
+    core.info(`Environment ${environmentName} created`)
 }
 
 async function deleteRDEEnvironment(programId, environmentName) {
@@ -166,7 +166,7 @@ async function getEnvironmentByName(sdk, programId, environmentName) {
 // }
 
 async function waitForEnvironmentReadyStatus(sdk, programId, environmentId) {
-    core.info('Waiting for Environment to be ready...')
+    core.startGroup('Waiting for Environment to be ready...')
     const delay = async (ms = 10000) => new Promise(resolve => setTimeout(resolve, ms))
     let attempts = 0;
 
@@ -175,11 +175,13 @@ async function waitForEnvironmentReadyStatus(sdk, programId, environmentId) {
         const status = await getEnvironmentStatus(sdk, programId, environmentId)
 
         if (status === 'ready' || status === 'updating') {
+            core.endGroup()
             core.info('Environment is ready.')
             return
         }
 
         if (status === 'failed') {
+            core.endGroup()
             core.error('Environment creation failed.')
             throw new Error('Environment creation failed.')
         }
@@ -188,6 +190,7 @@ async function waitForEnvironmentReadyStatus(sdk, programId, environmentId) {
         await delay()
     }
 
+    core.endGroup()
     core.error('Environment creation timed out.')
     throw new Error('Environment creation timed out.')
 }
