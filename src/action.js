@@ -90,21 +90,29 @@ async function deleteRDEEnvironment(programId, environmentName) {
 
     let environment = await getEnvironmentByName(sdk, programId, environmentName);
 
-    if (environment) {
-        core.info(`Environment ${environmentName} found. Deleting it.`)
-        if (environment.status === 'deleting') {
-            core.info(`Environment ${environmentName} already in deleting state. Skipping deletion.`)
-        } else
-            try {
-                core.info('Deleting RDE ...')
-                await sdk.deleteEnvironment(programId, environment.id)
-                core.info(`Environment ${environmentName} deletion requested`)
-            } catch (e) {
-                core.error('Error deleting environment', e)
-                core.setFailed(e)
-            }
-    } else
+    if (!environment) {
         core.info(`Environment ${environmentName} not found. No need to delete it.`)
+        return
+    }
+
+    if (environment.status === 'deleting') {
+        core.info(`Environment ${environmentName} already in deleting state. Skipping deletion.`)
+        return
+    }
+
+    if (environment.status === 'creating') {
+        core.info(`Environment ${environmentName} is in creating state. Waiting for it to become ready first..`)
+        await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
+    }
+
+    try {
+        core.info('Deleting environment ...')
+        await sdk.deleteEnvironment(programId, environment.id)
+        core.info(`Environment ${environmentName} deletion requested`)
+    } catch (e) {
+        core.error('Error deleting environment', e)
+        core.setFailed(e)
+    }
 }
 
 
