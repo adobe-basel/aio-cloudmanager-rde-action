@@ -14,7 +14,6 @@ async function createRDEEnvironment(programId, environmentName) {
     //create RDE environment
     let sdk;
     try {
-        console.log('initSdk');
         sdk = await initSdk();
         core.info('CM SDK initialized');
     } catch (e) {
@@ -22,25 +21,47 @@ async function createRDEEnvironment(programId, environmentName) {
         return
     }
 
-    core.info('Listing existing environments');
-    const environments = await sdk.listEnvironments(programId);
-    //list the environments
-    for (const environment of environments) {
-        core.info("Found: " + environment.id + " " + environment.name + " " + environment.type + " " + environment.description + " " + environment.status);
+    let environment = await getEnvironmentByName(sdk, programId, environmentName);
 
-        if (environment.name === environmentName) {
-            core.info(`Environment ${environmentName} already exists. Skipping creation.`)
-            await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
-            return
+    if (environment) {
+        core.info(`Environment ${environmentName} already exists.`)
+
+        if (environment.status === 'deleting') {
+            core.info(`Environment ${environmentName} is in deleting state. Cannot create it. Please wait for deletion to finish then try again.`)
+            core.error('Environment ${environmentName} is in deleting state')
+            core.setFailed('Environment ${environmentName} is in deleting state')
         }
+
+        await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
+        return
     }
+
+    // core.info('Listing existing environments');
+    // const environments = await sdk.listEnvironments(programId);
+    // //list the environments
+    // for (const environment of environments) {
+    //     core.info("Found: " + environment.id + " " + environment.name + " " + environment.type + " " + environment.description + " " + environment.status);
+    //
+    //     if (environment.name === environmentName) {
+    //         core.info(`Environment ${environmentName} already exists.`)
+    //
+    //         if (environment.status === 'deleting') {
+    //             core.info(`Environment ${environmentName} is in deleting state. Cannot create it. Please wait for deletion to finish then try again.`)
+    //             core.error('Environment ${environmentName} is in deleting state')
+    //             core.setFailed('Environment ${environmentName} is in deleting state')
+    //         }
+    //
+    //         await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
+    //         return
+    //     }
+    // }
 
     core.info('Environment does not exist. Creating it..');
 
     const program = await sdk._findProgram(programId)
     const environmentsHref = halfred.parse(program).link(rels.environments).href
     //trying to use https://developer.adobe.com/experience-cloud/cloud-manager/reference/api/#tag/Environments/operation/createEnvironment
-    const environment = await sdk._post(environmentsHref, {
+    await sdk._post(environmentsHref, {
             name: environmentName,
             type: "rde",
             region: "va7",
@@ -49,14 +70,16 @@ async function createRDEEnvironment(programId, environmentName) {
         },
         codes.ERROR_GET_PROGRAM)
 
-    const environmentId = environment.id
-    core.setOutput(`Environment creation for environmentId:${environment.id} started. Will wait for environment to be ready.`)
-    await waitForEnvironmentReadyStatus(sdk, programId, environmentId)
+    core.info(`Environment creation requested. Will wait for environment to be ready.`)
+    environment = await getEnvironmentByName(sdk, programId, environmentName);
+    core.info(`Environment creating with environmentId=${environment.id}. Will wait for environment to be ready.`)
 
-    core.setOutput('environmentId', environment.id)
-    core.setOutput('environmentName', environment.name)
-    core.setOutput('environmentType', environment.type)
-    core.setOutput('environmentDescription', environment.description);
+    await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
+
+    core.info('environmentId', environment.id)
+    core.info('environmentName', environment.name)
+    core.info('environmentType', environment.type)
+    core.info('environmentDescription', environment.description);
 
     core.summary.write(`Environment ${environmentName} created`).write()
 }
@@ -65,28 +88,23 @@ async function deleteRDEEnvironment(programId, environmentName) {
     //delete RDE environment
     const sdk = await initSdk();
 
-    const environments = await sdk.listEnvironments(programId);
-    for (const environment of environments) {
-        core.info("Found: " + environment.id + " " + environment.name + " " + environment.type + " " + environment.description + " " + environment.status);
+    let environment = await getEnvironmentByName(sdk, programId, environmentName);
 
-        if (environment.name === environmentName) {
-            core.info(`Environment ${environmentName} found. Deleting it.`)
-            if (environment.status === 'deleting') {
-                core.info(`Environment ${environmentName} already in deleting state. Skipping deletion.`)
-                return
-            } else
-                try {
-                    core.info('Deleting RDE ...')
-                    await sdk.deleteEnvironment(programId, environment.id)
-                    core.info(`Environment ${environmentName} deletion requested`)
-                } catch (e) {
-                    core.error('Error deleting environment', e)
-                    core.setFailed(e)
-                }
-            return
-        }
-    }
-    core.info(`Environment ${environmentName} not found. No need to delete it.`)
+    if (environment) {
+        core.info(`Environment ${environmentName} found. Deleting it.`)
+        if (environment.status === 'deleting') {
+            core.info(`Environment ${environmentName} already in deleting state. Skipping deletion.`)
+        } else
+            try {
+                core.info('Deleting RDE ...')
+                await sdk.deleteEnvironment(programId, environment.id)
+                core.info(`Environment ${environmentName} deletion requested`)
+            } catch (e) {
+                core.error('Error deleting environment', e)
+                core.setFailed(e)
+            }
+    } else
+        core.info(`Environment ${environmentName} not found. No need to delete it.`)
 }
 
 
@@ -116,6 +134,28 @@ async function getEnvironmentStatus(sdk, programId, environmentId) {
     }
     return null
 }
+
+async function getEnvironmentByName(sdk, programId, environmentName) {
+    const environments = await sdk.listEnvironments(programId);
+    //list the environments
+    for (const environment of environments) {
+        if (environment.name === environmentName) {
+            return environment
+        }
+    }
+    return null
+}
+
+// async function getEnvironmentById(sdk, programId, environmentId) {
+//     const environments = await sdk.listEnvironments(programId);
+//     //list the environments
+//     for (const environment of environments) {
+//         if (environment.id === environmentId) {
+//             return environment
+//         }
+//     }
+//     return null
+// }
 
 async function waitForEnvironmentReadyStatus(sdk, programId, environmentId) {
     core.info('Waiting for Environment to be ready...')
