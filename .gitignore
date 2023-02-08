@@ -71,3 +71,4 @@ typings/
 package-lock.json
 
 /dist/.aio
+/src/.aio

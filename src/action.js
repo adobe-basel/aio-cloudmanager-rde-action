@@ -31,57 +31,52 @@ async function createRDEEnvironment(programId, environmentName) {
             core.error('Environment ${environmentName} is in deleting state')
             core.setFailed('Environment ${environmentName} is in deleting state')
         }
+    } else {
+        core.info('Environment does not exist. Creating it..');
 
-        await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
-        return
+        const password = generatePassword();
+
+        const program = await sdk._findProgram(programId)
+        const environmentsHref = halfred.parse(program).link(rels.environments).href
+        //trying to use https://developer.adobe.com/experience-cloud/cloud-manager/reference/api/#tag/Environments/operation/createEnvironment
+        await sdk._post(environmentsHref, {
+                name: environmentName,
+                type: "rde",
+                region: "va7",
+                description: `Autocreated PR Validation RDE Environment`,
+                adminPassword: password
+            },
+            codes.ERROR_GET_PROGRAM)
+
+        environment = await getEnvironmentByName(sdk, programId, environmentName);
+        core.info(`Environment ${environment.name} created with environmentId=${environment.id}. Will wait for environment to be ready..`)
+        core.setSecret(password)
+        core.setOutput(environmentName + '_ADMIN_PASSWORD', password)
     }
 
-    // core.info('Listing existing environments');
-    // const environments = await sdk.listEnvironments(programId);
-    // //list the environments
-    // for (const environment of environments) {
-    //     core.info("Found: " + environment.id + " " + environment.name + " " + environment.type + " " + environment.description + " " + environment.status);
-    //
-    //     if (environment.name === environmentName) {
-    //         core.info(`Environment ${environmentName} already exists.`)
-    //
-    //         if (environment.status === 'deleting') {
-    //             core.info(`Environment ${environmentName} is in deleting state. Cannot create it. Please wait for deletion to finish then try again.`)
-    //             core.error('Environment ${environmentName} is in deleting state')
-    //             core.setFailed('Environment ${environmentName} is in deleting state')
-    //         }
-    //
-    //         await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
-    //         return
-    //     }
-    // }
-
-    core.info('Environment does not exist. Creating it..');
-
-    const program = await sdk._findProgram(programId)
-    const environmentsHref = halfred.parse(program).link(rels.environments).href
-    //trying to use https://developer.adobe.com/experience-cloud/cloud-manager/reference/api/#tag/Environments/operation/createEnvironment
-    await sdk._post(environmentsHref, {
-            name: environmentName,
-            type: "rde",
-            region: "va7",
-            description: "desc"
-            //description: "Autocreated PR Validation environment for PR 1: https://github.com/adobe-basel/aem-customer-repo-dxp/pull/2"
-        },
-        codes.ERROR_GET_PROGRAM)
-
-    core.info(`Environment creation requested. Will wait for environment to be ready.`)
-    environment = await getEnvironmentByName(sdk, programId, environmentName);
-    core.info(`Environment creating with environmentId=${environment.id}. Will wait for environment to be ready.`)
-
     await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
+
+
+    environment = await getEnvironmentByName(sdk, programId, environmentName)
 
     core.info('environmentId: ' + environment.id)
     core.info('environmentName: ' + environment.name)
     core.info('environmentType: ' + environment.type)
     core.info('environmentDescription: ' + environment.description);
+    core.info('Author URL: ' + environment._links["http://ns.adobe.com/adobecloud/rel/author"][0].href);
+    core.info('Publish URL: ' + environment._links["http://ns.adobe.com/adobecloud/rel/publish"][0].href);
+    core.info('Developer Console: ' + environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0].href);
 
-    core.info(`Environment ${environmentName} created`)
+    core.setOutput('programId', programId)
+    core.setOutput('environmentId', environment.id)
+    core.setOutput('environmentName', environment.name)
+    core.setOutput('environmentType', environment.type)
+    core.setOutput('environmentDescription', environment.description)
+    core.setOutput('authorUrl', environment._links["http://ns.adobe.com/adobecloud/rel/author"][0].href)
+    core.setOutput('publishUrl', environment._links["http://ns.adobe.com/adobecloud/rel/publish"][0].href)
+    core.setOutput('developerConsoleUrl', environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0]?.href)
+
+    core.info(`Environment ${environmentName} ready for use.`)
 }
 
 async function deleteRDEEnvironment(programId, environmentName) {
@@ -194,6 +189,18 @@ async function waitForEnvironmentReadyStatus(sdk, programId, environmentId) {
     core.error('Environment creation timed out.')
     throw new Error('Environment creation timed out.')
 }
+
+
+const crypto = require('crypto')
+
+const generatePassword = (
+    length = 20,
+    wishlist = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz~!@-#$'
+) =>
+    Array.from(crypto.randomFillSync(new Uint32Array(length)))
+        .map((x) => wishlist[x % wishlist.length])
+        .join('')
+
 
 module.exports = {
     executeAction
