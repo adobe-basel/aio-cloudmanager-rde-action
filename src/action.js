@@ -51,7 +51,7 @@ async function createRDEEnvironment(programId, environmentName) {
         environment = await getEnvironmentByName(sdk, programId, environmentName);
         core.info(`Environment ${environment.name} created with environmentId=${environment.id}. Will wait for environment to be ready..`)
         core.setSecret(password)
-        core.setOutput(environmentName + '_ADMIN_PASSWORD', password)
+        core.setOutput('adminPassword', password)
     }
 
     await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
@@ -74,7 +74,7 @@ async function createRDEEnvironment(programId, environmentName) {
     core.setOutput('environmentDescription', environment.description)
     core.setOutput('authorUrl', environment._links["http://ns.adobe.com/adobecloud/rel/author"][0].href)
     core.setOutput('publishUrl', environment._links["http://ns.adobe.com/adobecloud/rel/publish"][0].href)
-    core.setOutput('developerConsoleUrl', environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0]?.href)
+    core.setOutput('developerConsoleUrl', environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0].href)
 
     core.info(`Environment ${environmentName} ready for use.`)
 }
