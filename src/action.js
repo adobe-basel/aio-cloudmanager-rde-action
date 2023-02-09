@@ -67,7 +67,12 @@ async function createRDEEnvironment(programId, environmentName) {
     core.info('Publish URL: ' + environment._links["http://ns.adobe.com/adobecloud/rel/publish"][0].href);
     core.info('Developer Console: ' + environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0].href);
 
+    const program = await getProgramById(sdk, programId)
+
     core.setOutput('programId', programId)
+    core.setOutput('programName', program.name)
+    core.setOutput('tenantId', program.tenantId)
+
     core.setOutput('environmentId', environment.id)
     core.setOutput('environmentName', environment.name)
     core.setOutput('environmentType', environment.type)
@@ -75,6 +80,7 @@ async function createRDEEnvironment(programId, environmentName) {
     core.setOutput('authorUrl', environment._links["http://ns.adobe.com/adobecloud/rel/author"][0].href)
     core.setOutput('publishUrl', environment._links["http://ns.adobe.com/adobecloud/rel/publish"][0].href)
     core.setOutput('developerConsoleUrl', environment._links["http://ns.adobe.com/adobecloud/rel/developerConsole"][0].href)
+    core.setOutput('manageEnvironmentUrl', `https://experience.adobe.com/#/@${program.tenantId}/cloud-manager/environments.html/program/${environment.programId}/environment/${environment.id}`)
 
     core.info(`Environment ${environmentName} ready for use.`)
 }
@@ -148,6 +154,19 @@ async function getEnvironmentByName(sdk, programId, environmentName) {
     }
     return null
 }
+
+async function getProgramById(sdk, programId) {
+    const programs = await sdk.listPrograms();
+    //list the environments
+    for (const program of programs) {
+        if (program.id === programId) {
+            return program
+        }
+    }
+    return null
+}
+
+
 
 // async function getEnvironmentById(sdk, programId, environmentId) {
 //     const environments = await sdk.listEnvironments(programId);
