@@ -43,7 +43,7 @@ async function createRDEEnvironment(programId, environmentName) {
                 name: environmentName,
                 type: "rde",
                 region: "va7",
-                description: `Autocreated PR Validation RDE Environment`,
+                description: `Autocreated PR Validation RDE Environment ` + environmentName,
                 adminPassword: password
             },
             codes.ERROR_GET_PROGRAM)
