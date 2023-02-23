@@ -33,7 +33,7 @@ async function createRDEEnvironment(programId, environmentName) {
             core.setFailed('Environment ${environmentName} is in deleting state')
         }
     } else {
-        core.info('Environment does not exist. Creating it..');
+        core.info('Environment does not exist. Creating..');
 
         const password = generatePassword();
 
@@ -44,13 +44,13 @@ async function createRDEEnvironment(programId, environmentName) {
                 name: environmentName,
                 type: "rde",
                 region: "va7",
-                description: `Autocreated PR Validation RDE Environment ` + environmentName,
+                description: "Autocreated PR Validation RDE Environment (" + environmentName + ")",
                 adminPassword: password
             },
             codes.ERROR_GET_PROGRAM)
 
         environment = await getEnvironmentByName(sdk, programId, environmentName);
-        core.info(`Environment ${environment.name} created with environmentId=${environment.id}. Will wait for environment to be ready..`)
+        core.info(`Environment ${environment.name} created with environmentId=${environment.id}. Will wait for it to be ready..`)
         core.setSecret(password)
         core.setOutput('adminPassword', password)
         core.setOutput('created', true)
