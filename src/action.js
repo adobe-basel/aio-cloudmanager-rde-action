@@ -25,6 +25,7 @@ async function createRDEEnvironment(programId, environmentName) {
 
     if (environment) {
         core.info(`Environment ${environmentName} already exists.`)
+        core.setOutput('created', false)
 
         if (environment.status === 'deleting') {
             core.info(`Environment ${environmentName} is in deleting state. Cannot create it. Please wait for deletion to finish then try again.`)
@@ -52,6 +53,7 @@ async function createRDEEnvironment(programId, environmentName) {
         core.info(`Environment ${environment.name} created with environmentId=${environment.id}. Will wait for environment to be ready..`)
         core.setSecret(password)
         core.setOutput('adminPassword', password)
+        core.setOutput('created', true)
     }
 
     await waitForEnvironmentReadyStatus(sdk, programId, environment.id)
